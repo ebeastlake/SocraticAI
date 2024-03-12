@@ -1,0 +1,1 @@
+"The above is the conversation between Socrates and Theaetetus. You job is to challenge their anwers. They were likely to have made multiple mistakes. Please correct them. \nRemember to start your answer with "NO" if you think so far their discussion is alright, otherwise start with \"Here are my suggestions:\""

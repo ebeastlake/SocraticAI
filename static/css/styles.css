@@ -1,0 +1,129 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap");
+
+body {
+  font-family: Futura, sans-serif;
+  font-size: 0.8rem;
+  background-color: #212529;
+  color: #f8f9fa;
+}
+#chat-container {
+  width: 80%;
+  max-width: 900px;
+  margin: 2rem auto;
+}
+#chat-history {
+  height: 600px;
+  border: 1px solid #ccc;
+  overflow-y: scroll;
+  padding: 10px;
+  background-color: #343a40;
+}
+.manual-chat-controls {
+  display: none; /* Hide manual chat controls by default */
+}
+#user-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+p {
+  margin: 3px 0;
+}
+h1 {
+  font-family: "Quicksand", sans-serif;
+  font-size: 2.5rem;
+  color: #ffffff;
+}
+.typing-animation {
+  display: inline-block;
+  position: relative;
+  bottom: -0.1em;
+  margin-left: 0.1em;
+  font-size: 1rem;
+  animation: typing 0.02s steps(4) 0s infinite;
+}
+@keyframes typing {
+  0% {
+    width: 0.1em;
+  }
+  50% {
+    width: 0.6em;
+  }
+  100% {
+    width: 0.1em;
+  }
+}
+.message-sender {
+  font-weight: bold;
+}
+.message-content {
+  display: inline;
+}
+/* Additional styling and animation */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.05),
+    rgba(0, 0, 0, 0.3),
+    rgba(0, 0, 0, 0.3)
+  );
+  background-size: 50px 50px;
+  z-index: -1;
+  animation: intelligent-bg 15s linear infinite;
+}
+@keyframes intelligent-bg {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+/* User message colors */
+.ai-tutor-message {
+  margin-bottom: 8px;
+  color: #e74c3c;
+}
+.student-persona-message {
+  margin-bottom: 8px;
+  color: #3498db;
+}
+.proofreader-message {
+  margin-bottom: 8px;
+  color: #f1c40f;
+}
+.system-message {
+  text-align: center;
+  margin-bottom: 6px;
+  color: #94928e;
+}
+/* Copy button styling */
+.copy-code-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #f8f9fa;
+  color: #212529;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 10;
+}
+
+.hljs {
+  position: relative;
+}
+
+.hljs:hover .copy-code-btn {
+  opacity: 1;
+}
