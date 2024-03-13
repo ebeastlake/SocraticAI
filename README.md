@@ -22,6 +22,6 @@ export WOLFRAM_APP_ID="your-wolfram-alpha-key"
 python3 app.py
 ```
 
-4. Access the web app by opening your browser and navigating to the address [http://127.0.0.1:5000/](http://127.0.0.1:5000/). We recommend using Google Chrome for the best user experience.
+4. Access the web app by opening your browser and navigating to the address [http://127.0.0.1:9000/](http://127.0.0.1:9000/). We recommend using Google Chrome for the best user experience.
 
 Now, you're all set to explore the power of Socratic dialogue and AI-driven problem-solving with SocraticAI!
