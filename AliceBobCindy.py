@@ -1,7 +1,3 @@
-import sys
-import os
-import re
-import time
 import openai
 import logging
 
@@ -12,8 +8,7 @@ from util import load_system_prompts, set_openai_credentials
 
 load_dotenv()
 set_openai_credentials()
-# TODO: Refactor to use nested system prompt objects
-ai_tutor_system_prompt, student_persona_system_prompt, proofreader_system_prompt = load_system_prompts()
+prompts = load_system_prompts()
 
 """
 TODO: 
@@ -23,56 +18,34 @@ TODO:
 """
 
 class StudentPersonaGPT:
-    def __init__(self, role, n_round, model="gpt-3.5-turbo"):
+    def __init__(self, role, model="gpt-3.5-turbo", app=None, other_role=None):
         self.role = role
         self.model = model
-        self.n_round = n_round
+        self.other_role = other_role
         
         if self.role == "ai_tutor":
-            self.other_role = "student"
+            self.chat_completion_role = "assistant"
         elif self.role == "student":
-            self.other_role = "ai_tutor"
+            self.chat_completion_role = "user"
         
+        self.app = app
+        self.logger = app.logger if app else logging.getLogger(__name__)
         self.history = []
         
-    def initialize_chat(self, student_persona="default"):
-        system_content = ""
-        if self.role == "ai_tutor":
-            # system_content = system_prompts["ai_tutor"]
-            # self.history.append({
-            #     "role": "system",
-            #     "content": system_content
-            # })
-            self.history.append({
-                "role": "system",
-                "content": ai_tutor_system_prompt
-            })
-        elif self.role == "student":
-            # persona_prompt = system_prompts["student"].get(student_persona, system_prompts["student"]["default"])
-            # system_content = persona_prompt
-            # self.history.append({
-            #     "role": "system",
-            #     "content": system_content
-            # })
-            self.history.append({
-                "role": "system",
-                "content": student_persona_system_prompt
-            })
-        # TODO: Add logic for proofreader
-        # elif self.role == "proofreader":
-        #     system_content = system_prompts["proofreader"]
-        #     self.history.append({
-        #         "role": "system",
-        #         "content": system_content
-        #     })
-
-        # TODO: Determine if the initial message for ai_tutor should be set here        
-        # if self.role == "ai_tutor":
-        #     return system_content
+    def initialize_chat(self, selected_persona="student_distracted"):
+        key = selected_persona if self.role == "student" else "ai_tutor"
+        info = prompts.get(key)
         
-    
+        if info is None:
+            raise ValueError(f"No valid info found for key: '{key}'.")
+        
+        prompt = info['prompt']
+        self.history.append({"role": "system", "content": prompt})
+
     def generate_chat_response(self, additional_messages=None, temperature=None):
+        self.logger.debug(f"Generating based on history: {self.history}")
         messages = self.history + (additional_messages if additional_messages else [])
+
         try:
             response = openai.ChatCompletion.create(
                 model=self.model,
@@ -85,29 +58,16 @@ class StudentPersonaGPT:
                 message_content = "The context length exceeds my limit... "
             else:
                 message_content = f"I encountered an error when using my backend model.\n\nError: {str(e)}"
+        self.logger.debug(f"Generated response: {message_content}")
         return message_content
 
-    def get_response(self, temperature=None):
-        logging.info(f"getting response from AliceBobCindy, self.role: {self.role}")
+    def get_response(self):
+        temperature = 1 if self.role == "student" else 0
         msg = self.generate_chat_response(temperature=temperature)
-        self.history.append({"role": "assistant", "content": msg})
+        self.update_history(msg)
         return msg
     
-    def get_proofread(self, temperature=None):
-        proofread_template = {"role": "user", "content": proofreader_system_prompt}
-        msg = self.generate_chat_response(additional_messages=[proofread_template], temperature=temperature)
-        if msg[:2] not in ["NO", "No", "no"]:
-            self.history.append({"role": "assistant", "content": msg})
-        return msg
-
     def update_history(self, message):
-        self.history.append({
-            "role": "user",
-            "content": message
-        })
-
-    def add_proofread(self, proofread):
-        self.history.append({
-            "role": "system",
-            "content": f"Message from a proofreader Plato to you two: {proofread}"
-        })
+        self.history.append({"role": self.chat_completion_role, "content": message})
+        if self.other_role:
+            self.other_role.history.append({"role": self.chat_completion_role, "content": message})

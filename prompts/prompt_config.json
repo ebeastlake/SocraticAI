@@ -1,0 +1,30 @@
+{
+  "ai_tutor": {
+    "prompt_file": "ai_tutor_prompt.txt",
+    "display_name": "AI Tutor"
+  },
+  "proofreader": {
+    "prompt_file": "proofreader_prompt.txt",
+    "display_name": "Proofreader"
+  },
+  "student_tangent_taker": {
+    "prompt_file": "student_tangent_taker_prompt.txt",
+    "display_name": "The Tangent Taker"
+  },
+  "student_perpetual_skeptic": {
+    "prompt_file": "student_perpetual_skeptic_prompt.txt",
+    "display_name": "The Perpetual Skeptic"
+  },
+  "student_detail_ignorer": {
+    "prompt_file": "student_detail_ignorer_prompt.txt",
+    "display_name": "The Detail Ignorer"
+  },
+  "student_argumentative_contrarian": {
+    "prompt_file": "student_argumentative_contrarian_prompt.txt",
+    "display_name": "The Argumentative Contrarian"
+  },
+  "student_rapid_fire_questioner": {
+    "prompt_file": "student_rapid_fire_questioner_prompt.txt",
+    "display_name": "The Rapid-Fire Questioner"
+  }
+}

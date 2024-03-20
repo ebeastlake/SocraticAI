@@ -30,27 +30,17 @@
         <select class="form-select" id="student-persona-dropdown">
           <!-- Options for user personas will be added here by JavaScript -->
         </select>
+      </div>
+      <div class="input-group mb-3">
+        <select class="form-select" id="num-turns-dropdown">
+          <option selected>Choose number of turns...</option>
+          <!-- Options 1 through 20 will be added via JavaScript -->
+        </select>
         <button id="start-conversation-btn" class="btn btn-primary">
           Start Conversation
         </button>
       </div>
       <div id="chat-history" class="rounded"></div>
-      <div class="input-group mt-3">
-        <!-- <button id="toggle-manual-chat-btn" class="btn btn-secondary">
-          Enable Manual Chat
-        </button> -->
-        <div class="manual-chat-controls">
-          <textarea
-            id="user-input"
-            class="form-control"
-            placeholder="Type your message..."
-            rows="3"
-          ></textarea>
-          <div class="send-btn-container">
-            <button id="send-btn" class="btn btn-success btn-sm">Send</button>
-          </div>
-        </div>
-      </div>
     </div>
     <script>
       const studentPersonas = [
@@ -65,7 +55,6 @@
         // Add more personas as needed
       ];
 
-      let pollingStarted = false;
       let requestInProgress = false;
 
       const md = window.markdownit({
@@ -83,22 +72,49 @@
       });
 
       $(document).ready(function () {
+        $.getJSON("/get-personas")
+          .done((personas) => {
+            console.log("Loaded personas:", personas);
+            const dropdown = $("#student-persona-dropdown");
+            $.each(personas, (key, displayName) => {
+              // This keeps the jQuery style consistent for appending options
+              dropdown.append(
+                $("<option>", {
+                  value: key,
+                  text: displayName,
+                })
+              );
+            });
+          })
+          .fail(() => {
+            console.error("Error: Could not load persona prompts.");
+            // Consider providing user feedback directly in the UI about the error
+            $("#error-message").text(
+              "Could not load persona options. Please refresh the page or try again later."
+            );
+          });
+
+        setInterval(obtainActiveMessage, 1000);
         hljs.highlightAll();
 
-        setupPersonaDropdown();
-        // setupManualChatToggle();
+        let numTurnsDropdown = $("#num-turns-dropdown");
+        for (let i = 1; i <= 20; i++) {
+          numTurnsDropdown.append(new Option(i, i));
+        }
 
         handleCopyCode();
 
         $("#start-conversation-btn").on("click", function () {
+          let numberOfTurns = $("#num-turns-dropdown").val();
           let selectedPersona = $("#student-persona-dropdown").val();
-          startConversation(selectedPersona);
+          startConversation(selectedPersona, numberOfTurns);
         });
       });
 
       function addChatMessage(sender, message) {
         let formattedMessage = md.render(message).trim();
         let chat_history = $("#chat-history");
+        console.log("Adding message:", sender, formattedMessage);
         let cssClass = sender + "-message";
         chat_history.append(
           '<div class="' +
@@ -126,17 +142,23 @@
       }
 
       function obtainActiveMessage() {
-        if (!requestInProgress && pollingStarted) {
+        if (!requestInProgress) {
           requestInProgress = true;
           $.ajax({
             url: "/active-message",
             type: "GET",
             dataType: "json",
             success: function (data) {
+              console.log("Active messages:", data);
               var msg_count = data.length;
               if (msg_count > 0) {
                 for (var i = 0; i < msg_count; i++) {
                   if (data[i].response) {
+                    console.log(
+                      "Adding active message:",
+                      data[i].role,
+                      data[i].response
+                    );
                     addChatMessage(data[i].role, data[i].response);
                   }
                 }
@@ -149,33 +171,6 @@
             },
           });
         }
-      }
-
-      function setupPersonaDropdown() {
-        let dropdown = $("#student-persona-dropdown");
-        studentPersonas.forEach((persona) => {
-          // TODO: Change the value from persona.prompt
-          dropdown.append(
-            `<option value="${persona.prompt}">${persona.name}</option>`
-          );
-        });
-      }
-
-      function setupManualChatToggle() {
-        // Toggle manual chat mode
-        $("#toggle-manual-chat-btn").click(function () {
-          $(".manual-chat-controls").toggle(); // Show/hide the manual chat controls
-          let isManualChatEnabled = $(".manual-chat-controls").is(":visible");
-          if (isManualChatEnabled) {
-            $(this).text("Disable Manual Chat");
-            // Optionally disable automatic message fetching when in manual mode
-            clearInterval(activeMessageInterval); // Assuming you have a variable named activeMessageInterval for your setInterval call
-          } else {
-            $(this).text("Enable Manual Chat");
-            // Optionally re-enable automatic message fetching when manual mode is disabled
-            activeMessageInterval = setInterval(obtainActiveMessage, 2000);
-          }
-        });
       }
 
       function handleCopyCode() {
@@ -191,34 +186,24 @@
         });
       }
 
-      function handlePersonaSelection() {
-        $("#student-persona-dropdown").on("change", function () {
-          let selectedPersona = $(this).val();
-          if (selectedPersona) {
-            $("#select-persona-message").hide();
-          }
-        });
-      }
-
-      function startConversation(selectedPersona) {
+      function startConversation(selectedPersona, numberOfTurns) {
         console.log("Starting conversation...");
         $.ajax({
           url: "/chat",
           type: "POST",
           contentType: "application/json",
-          data: JSON.stringify({ selected_persona: selectedPersona }),
+          data: JSON.stringify({
+            selected_persona: selectedPersona,
+            n_turns: numberOfTurns,
+          }),
           dataType: "json",
           success: function (data) {
+            console.log("started conversation!", data);
             var msg_count = data.length;
             for (var i = 0; i < msg_count; i++) {
               if (data[i].response) {
                 addChatMessage(data[i].role, data[i].response);
               }
-            }
-
-            if (!pollingStarted) {
-              setInterval(obtainActiveMessage, 2000);
-              pollingStarted = true; // Ensure this is defined and accessible
             }
           },
           error: function (xhr, status, error) {

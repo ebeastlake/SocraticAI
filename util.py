@@ -1,8 +1,8 @@
+import json
 import logging
+import openai
 import os
 import sys
-
-import openai
 
 def load_prompt_from_file(filename, directory="prompts"):
     """Reads a prompt from a text file in a specified directory and returns it as a string."""
@@ -15,11 +15,21 @@ def load_prompt_from_file(filename, directory="prompts"):
     
 def load_system_prompts():
     try:
-        ai_tutor_system_prompt = load_prompt_from_file("ai_tutor_system_prompt.txt")
-        student_persona_system_prompt = load_prompt_from_file("student_persona_system_prompt.txt")
-        proofreader_system_prompt = load_prompt_from_file("proofreader_system_prompt.txt")
-        return ai_tutor_system_prompt, student_persona_system_prompt, proofreader_system_prompt
-    except FileNotFoundError as e:
+        directory = "prompts"
+        prompts = {}
+
+        with open(os.path.join(directory, "prompt_config.json"), 'r') as config_file:
+            config = json.load(config_file)
+            for persona, info in config.items():
+                prompt_text = load_prompt_from_file(info['prompt_file'], directory)
+                prompts[persona] = {
+                    "display_name": info['display_name'],
+                    "prompt": prompt_text
+                }
+
+        print(f"Prompts loaded successfully. Prompts: {list(prompts.keys())}")
+        return prompts
+    except (FileNotFoundError, json.JSONDecodeError) as e:
         print(e, file=sys.stderr)
         sys.exit(1)
         

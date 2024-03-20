@@ -86,7 +86,7 @@ body::after {
   }
 }
 /* User message colors */
-.ai-tutor-message {
+.ai_tutor-message {
   margin-bottom: 8px;
   color: #e74c3c;
 }
