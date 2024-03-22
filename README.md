@@ -13,7 +13,6 @@ pip3 install -r requirements.txt
 ```
 export OPENAI_ORG="your-openai-org"
 export OPENAI_API_KEY="your-openai-key"
-export WOLFRAM_APP_ID="your-wolfram-alpha-key"
 ```
 
 3. Run the web application by executing the following command in your terminal:
@@ -22,6 +21,6 @@ export WOLFRAM_APP_ID="your-wolfram-alpha-key"
 python3 app.py
 ```
 
-4. Access the web app by opening your browser and navigating to the address [http://127.0.0.1:9000/](http://127.0.0.1:9000/). We recommend using Google Chrome for the best user experience.
+4. Access the web app by opening your browser and navigating to the address [http://127.0.0.1:9000/](http://127.0.0.1:9000/). 
 
-Now, you're all set to explore the power of Socratic dialogue and AI-driven problem-solving with SocraticAI!
+Now, you're all set!
